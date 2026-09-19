@@ -57,8 +57,8 @@ def test_berry_gauge_phase_invariance() -> None:
     ph = np.exp(1j * rng.uniform(0, 2 * np.pi, size=2))
     U2 = eig.vectors * jnp.asarray(ph)[None, :]
     # reconstruct curvature from U2 + same dH, compare
-    from wannierx.geometry.berry import _omega_all_bands
     from wannierx.fourier.derivatives import dH_dk
+    from wannierx.geometry.berry import _omega_all_bands
 
     dH = dH_dk(m, k)
     Ud2 = jnp.swapaxes(jnp.conjugate(U2), -1, -2)
@@ -72,7 +72,6 @@ def test_berry_basis_invariance() -> None:
     """k-independent orbital basis change leaves Omega unchanged."""
     m = qiwuzhang(u=-1.0)
     rng = np.random.default_rng(1)
-    a = jax.random.normal(jax.random.PRNGKey(0), (2, 2)) if False else None
     q, _ = np.linalg.qr(rng.normal(size=(2, 2)) + 1j * rng.normal(size=(2, 2)))
     Q = jnp.asarray(q)
     Qd = jnp.conjugate(Q).T

@@ -9,7 +9,6 @@ import numpy as np
 import wannierx as wx
 from wannierx.constants import EV_ANG_OVER_HBAR_TO_M_S
 from wannierx.linalg.degeneracy import cluster_degenerate, is_degenerate
-from wannierx.linalg.projectors import projector
 from wannierx.models.chain import chain
 from wannierx.models.qzhang import qiwuzhang
 from wannierx.models.ssh import ssh

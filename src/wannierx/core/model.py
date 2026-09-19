@@ -70,11 +70,10 @@ class WannierModel:
             raise ModelError(f"H_R orbital axes must be square, got {H_R.shape}")
         if weights.shape != (n_R,):
             raise ModelError(f"weights must have shape ({n_R},), got {weights.shape}")
-        if centers is not None:
-            if centers.shape != (H_R.shape[1], 3):
-                raise ModelError(
-                    f"centers must have shape (n_orb, 3)=({H_R.shape[1]}, 3), got {centers.shape}"
-                )
+        if centers is not None and centers.shape != (H_R.shape[1], 3):
+            raise ModelError(
+                f"centers must have shape (n_orb, 3)=({H_R.shape[1]}, 3), got {centers.shape}"
+            )
         if len(tuple(self.periodic)) != 3:
             raise ModelError(f"periodic must have length 3, got {self.periodic}")
 

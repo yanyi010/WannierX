@@ -6,7 +6,6 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-import wannierx as wx
 from wannierx.kpoints.mesh import monkhorst_pack
 
 ATOL = 1e-15

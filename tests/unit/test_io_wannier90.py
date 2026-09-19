@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 import wannierx as wx
-from wannierx.core.exceptions import LatticeError, ParseError, WannierXError
+from wannierx.core.exceptions import ParseError, WannierXError
 from wannierx.io.wannier90.hr import parse_hr
 from wannierx.io.wannier90.win import parse_win_lattice
 

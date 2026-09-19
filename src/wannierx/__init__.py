@@ -29,7 +29,7 @@ from wannierx.response.occupations import fermi_dirac
 
 __version__ = "0.1.0"
 
-__all__ = [
+__all__ = [  # noqa: RUF022  (grouped by subsystem, not alphabetically)
     "__version__",
     "config",
     "constants",

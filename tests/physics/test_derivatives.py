@@ -56,7 +56,8 @@ def test_dH_dk_multi_step_finite_difference() -> None:
 
     def dH_fd(h: float, comp: int) -> np.ndarray:
         # step along cartesian component `comp`
-        dk_cart = np.zeros(3); dk_cart[comp] = h
+        dk_cart = np.zeros(3)
+        dk_cart[comp] = h
         dk_frac = dk_cart @ np.linalg.inv(B)
         Hp = np.asarray(wx.hamiltonian(m, jnp.asarray(k0 + dk_frac)))[0]
         Hm = np.asarray(wx.hamiltonian(m, jnp.asarray(k0 - dk_frac)))[0]
@@ -88,7 +89,8 @@ def test_d2H_dk2_fd_of_dH_dk() -> None:
     B = 2 * np.pi * np.linalg.inv(np.asarray(m.lattice.direct)).T
 
     def d2_fd(h: float) -> np.ndarray:
-        dk = np.zeros(3); dk[0] = h
+        dk = np.zeros(3)
+        dk[0] = h
         dkp = (k0 + dk @ np.linalg.inv(B))
         dkm = (k0 - dk @ np.linalg.inv(B))
         dp = np.asarray(wx.dH_dk(m, jnp.asarray(dkp)))[0, 0]

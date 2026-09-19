@@ -5,7 +5,6 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 import numpy as np
-import pytest
 
 import wannierx as wx
 from wannierx.kpoints.integration import integrate, integrate_bands

@@ -15,7 +15,6 @@ import jax.numpy as jnp
 from jax import Array
 
 from wannierx.core.model import WannierModel
-from wannierx.kpoints.integration import integrate_bands
 from wannierx.kpoints.mesh import KMesh
 from wannierx.linalg.eigh import eigh
 

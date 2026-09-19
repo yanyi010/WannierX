@@ -8,7 +8,6 @@ import numpy as np
 import wannierx as wx
 from wannierx.core.lattice import Lattice
 from wannierx.core.model import WannierModel
-from wannierx.models.chain import chain
 from wannierx.models.ssh import ssh
 
 ATOL = 1e-13
@@ -30,7 +29,6 @@ def _random_hermitian_model(seed: int, n_R: int = 7, n_orb: int = 3) -> WannierM
         blocks.append(h)
     blocks = np.asarray(blocks)
     # make pair (R, -R) Hermitian-conjugate
-    n0 = len(blocks) - 1
     for i in range(n_R):
         blocks[n_R + i] = blocks[i].conj().T
     H_R = jnp.asarray(blocks)

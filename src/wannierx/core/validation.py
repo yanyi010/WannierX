@@ -90,9 +90,6 @@ def validate_hermiticity(model: WannierModel, atol: float = 1e-12) -> Hermiticit
         rel = jnp.where(ref > 0, abs_err / jnp.where(ref > 0, ref, 1.0), 0.0)
         max_rel = max(max_rel, float(jnp.max(rel)))
 
-    no_pairs = not R_list or all(
-        _r_key(jnp.asarray(k)) and (-k[0], -k[1], -k[2]) not in index for k in []
-    )
     any_related = any(((-k[0], -k[1], -k[2]) in index) for k in R_list)
     if not any_related:
         max_abs_out = float("nan")

@@ -20,7 +20,6 @@ from dataclasses import asdict, dataclass
 
 import jax
 import jax.numpy as jnp
-import numpy as np
 
 import wannierx as wx
 from wannierx.kpoints.mesh import monkhorst_pack
@@ -88,7 +87,6 @@ def run(nk_side: int = 32) -> list[BenchResult]:
         "berry_curvature",
         lambda m, kk: wx.berry_curvature(m, kk, degeneracy_policy="nan"),
     )
-    from wannierx.kpoints.integration import integrate
 
     bench(
         "bz_integrate_eigh",

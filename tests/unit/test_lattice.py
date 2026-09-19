@@ -64,8 +64,8 @@ def test_pytree_and_jit() -> None:
     lat = Lattice(jnp.eye(3) * 2.0)
 
     @jax.jit
-    def f(l: Lattice, k) -> jnp.ndarray:
-        return l.frac_to_cart_k(k)
+    def f(lat_in: Lattice, k) -> jnp.ndarray:
+        return lat_in.frac_to_cart_k(k)
 
     out = f(lat, jnp.array([0.5, 0.0, 0.0]))
     np.testing.assert_allclose(

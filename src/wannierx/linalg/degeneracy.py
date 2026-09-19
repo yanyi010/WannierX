@@ -39,10 +39,7 @@ def cluster_degenerate(
     structure is discrete metadata.
     """
     e = np.asarray(energies)
-    if e.ndim == 1:
-        e_b = e[None]
-    else:
-        e_b = e.reshape(-1, e.shape[-1])
+    e_b = e[None] if e.ndim == 1 else e.reshape(-1, e.shape[-1])
     de = np.abs(e_b[:, 1:] - e_b[:, :-1])
     scale = np.maximum(np.abs(e_b[:, 1:]), np.abs(e_b[:, :-1]))
     same = de <= (atol + rtol * scale)

@@ -22,7 +22,6 @@ import wannierx as wx
 from wannierx.core.model import WannierModel
 from wannierx.kpoints.mesh import monkhorst_pack
 from wannierx.models.chain import chain
-from wannierx.models.qzhang import qiwuzhang
 
 TOL_FD = 1e-7
 
@@ -85,7 +84,6 @@ def test_grad_smooth_dos() -> None:
     E = jnp.linspace(-3.0, 3.0, 200)
 
     def smooth(t):
-        eps = wx.eigh(_replace_t(m0, t), mesh.points).energies
         # smooth functional: total DOS at fixed E via gaussian kernel moments
         d = wx.dos(_replace_t(m0, t), mesh, E, 0.08)
         return jnp.sum(d * E**2)

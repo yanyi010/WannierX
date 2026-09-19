@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-import jax.lax
 import jax.numpy as jnp
 import numpy as np
 from jax import Array
