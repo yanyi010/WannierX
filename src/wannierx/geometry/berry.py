@@ -103,13 +103,18 @@ def berry_curvature(
     deg_sel = deg[..., sel]  # (..., n_sel) bool
 
     if degeneracy_policy == "error":
-        if isinstance(deg_sel, np.ndarray) or not hasattr(deg_sel, "aval"):
-            if bool(np.asarray(deg_sel).any()):
-                raise DegeneracyError(
-                    "berry_curvature requested for a band degenerate within the "
-                    "given tolerances; isolate a nondegenerate band or use a "
-                    "subspace/projector formulation"
-                )
+        # Host-side strict check; skipped silently only when values are tracers
+        # (i.e. inside jit/vmap), which is documented behavior.
+        try:
+            has_deg = bool(np.asarray(deg_sel).any())
+        except Exception:
+            has_deg = False  # traced: cannot host-check
+        if has_deg:
+            raise DegeneracyError(
+                "berry_curvature requested for a band degenerate within the "
+                "given tolerances; isolate a nondegenerate band or use a "
+                "subspace/projector formulation"
+            )
         return out
 
     mask = jnp.broadcast_to(deg_sel[..., None, None], out.shape)
