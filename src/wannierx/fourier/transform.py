@@ -22,8 +22,9 @@ def _phase_matrix(model: WannierModel, k: Array) -> Array:
     k = jnp.asarray(k)
     if k.shape[-1] != 3:
         raise ValueError(f"k must have last dimension 3, got shape {k.shape}")
-    # (..., 1, 3) @ (1, n_R, 3) -> (..., n_R)
-    kr = jnp.sum(k[..., None, :] * model.R[None], axis=-1)
+    # (..., 3) . (n_R, 3) -> (..., n_R); preserves all leading dims and
+    # adds none for a single k point of shape (3,).
+    kr = jnp.einsum("...a,Ra->...R", k, model.R)
     phase = jnp.exp(1j * 2.0 * jnp.pi * kr)
     return phase * model.weights
 

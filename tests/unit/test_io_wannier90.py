@@ -34,6 +34,67 @@ def test_parse_hr_malformed(tmp_path: Path) -> None:
         parse_hr(bad)
 
 
+def _write_hr_line(r: tuple[int, int, int], m: int, n: int, re: float, im: float) -> str:
+    return f" {r[0]:4d} {r[1]:4d} {r[2]:4d} {m:4d} {n:4d} {re:14.8f} {im:14.8f}\n"
+
+
+def _hr_header(num_wann: int = 2, n_R: int = 1, degen: int = 1) -> str:
+    return f"header\n{num_wann}\n{n_R}\n{degen}\n"
+
+
+def test_parse_hr_duplicate_entry_raises(tmp_path: Path) -> None:
+    # correct total line count, but (m, n)=(1, 1) appears twice and
+    # (2, 2) never appears in the R block
+    text = _hr_header()
+    text += _write_hr_line((0, 0, 0), 1, 1, 0.0, 0.0)
+    text += _write_hr_line((0, 0, 0), 1, 2, 0.8, 0.0)
+    text += _write_hr_line((0, 0, 0), 2, 1, 0.8, 0.0)
+    text += _write_hr_line((0, 0, 0), 1, 1, 5.0, 0.0)  # duplicate (1,1)
+    p = tmp_path / "dup_hr.dat"
+    p.write_text(text)
+    with pytest.raises(ParseError, match="duplicate"):
+        parse_hr(p)
+
+
+def test_parse_hr_missing_entry_raises(tmp_path: Path) -> None:
+    # correct total line count, but (m, n)=(2, 2) is replaced by a
+    # repetition of (1, 2); without duplicate detection the missing
+    # entry would silently keep np.empty garbage
+    text = _hr_header()
+    text += _write_hr_line((0, 0, 0), 1, 1, 0.0, 0.0)
+    text += _write_hr_line((0, 0, 0), 1, 2, 0.8, 0.0)
+    text += _write_hr_line((0, 0, 0), 1, 2, 0.9, 0.0)  # wrong entry
+    text += _write_hr_line((0, 0, 0), 2, 1, 0.8, 0.0)
+    p = tmp_path / "miss_hr.dat"
+    p.write_text(text)
+    with pytest.raises(ParseError, match="duplicate"):
+        parse_hr(p)
+    # missing-only variant: fewer lines than num_wann^2 in the block
+    text2 = _hr_header()
+    text2 += _write_hr_line((0, 0, 0), 1, 1, 0.0, 0.0)
+    text2 += _write_hr_line((0, 0, 0), 1, 2, 0.8, 0.0)
+    text2 += _write_hr_line((0, 0, 0), 2, 1, 0.8, 0.0)
+    p2 = tmp_path / "miss2_hr.dat"
+    p2.write_text(text2)
+    with pytest.raises(ParseError, match="missing"):
+        parse_hr(p2)
+
+
+def test_parse_hr_nonpositive_degeneracy_raises(tmp_path: Path) -> None:
+    text = _hr_header(degen=0)
+    for m in (1, 2):
+        for n in (1, 2):
+            text += _write_hr_line((0, 0, 0), m, n, 0.0, 0.0)
+    p = tmp_path / "degen0_hr.dat"
+    p.write_text(text)
+    with pytest.raises(ParseError, match="positive"):
+        parse_hr(p)
+    p2 = tmp_path / "degenneg_hr.dat"
+    p2.write_text(_hr_header(degen=-2))
+    with pytest.raises(ParseError, match="positive"):
+        parse_hr(p2)
+
+
 def test_parse_win_lattice() -> None:
     lat = parse_win_lattice(FIX / "toy.win")
     np.testing.assert_allclose(np.asarray(lat.direct), np.diag([4.0, 8.0, 10.0]))

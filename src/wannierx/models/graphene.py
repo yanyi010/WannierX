@@ -46,7 +46,7 @@ def graphene(t: float = 2.7) -> WannierModel:
     for d in [(1, 0, 0), (0, 1, 0), (-1, -1, 0)]:
         R_list.append(d)
         H_list.append(blk(0, 1, -t))
-        R_list.append(tuple(-x for x in d))
+        R_list.append((-d[0], -d[1], -d[2]))
         H_list.append(blk(1, 0, -t))
 
     R = jnp.asarray(R_list)

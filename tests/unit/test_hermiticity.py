@@ -57,3 +57,22 @@ def test_onsite_imaginary_contamination() -> None:
     rep = validate_hermiticity(_clone(m, H_R=H_R))
     assert not rep.is_hermitian
     assert abs(rep.max_absolute_error - 1.0) < 1e-15  # |eps - conj(eps)| = 2*Im
+
+
+def test_asymmetric_weights_non_hermitian() -> None:
+    # H_R itself is Hermitian-paired (H_1 = H_{-1}^dagger), but w_1 != w_{-1}
+    # makes the effective hopping T_R = w_R H_R non-paired, so H(k) is not
+    # Hermitian even though the bare-H_R check would pass.
+    m = chain(t=-1.0)
+    weights = m.weights.at[2].set(0.5)  # R=+1 weight, R=-1 keeps 1.0
+    rep = validate_hermiticity(_clone(m, weights=weights))
+    assert not rep.is_hermitian
+    # worst pair: |w_+1 t - w_-1 t| = |0.5 - 1.0| * |t| = 0.5
+    assert abs(rep.max_absolute_error - 0.5) < 1e-15
+    assert rep.worst_R is not None
+    # both R = ±1 pairs have the same error; the first encountered (R=-1,
+    # the model's first row) is reported
+    np.testing.assert_array_equal(np.asarray(rep.worst_R), np.array([-1, 0, 0]))
+    # sanity: symmetric weights on the same model still pass
+    rep_sym = validate_hermiticity(_clone(m, weights=jnp.full(3, 0.5)))
+    assert rep_sym.is_hermitian

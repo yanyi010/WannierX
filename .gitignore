@@ -10,3 +10,4 @@ dist/
 !tests/reference/fixtures/*.npy
 examples/demo_input/
 *result*/
+.autors/

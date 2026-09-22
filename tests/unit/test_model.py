@@ -55,3 +55,70 @@ def test_jit_function_accepts_model() -> None:
 def test_complex128_preserved() -> None:
     assert jnp.asarray(_toy().H_R).dtype == jnp.complex128
     assert jnp.asarray(_toy().lattice.direct).dtype == jnp.float64
+
+
+def _clone_value(m: WannierModel, **kw) -> WannierModel:
+    return WannierModel(
+        lattice=kw.get("lattice", m.lattice),
+        R=kw.get("R", m.R),
+        H_R=kw.get("H_R", m.H_R),
+        weights=kw.get("weights", m.weights),
+        periodic=kw.get("periodic", m.periodic),
+        centers=kw.get("centers", m.centers),
+    )
+
+
+def test_construction_rejects_non_integer_R() -> None:
+    m = _toy()
+    R = m.R.astype(jnp.float64).at[0, 0].set(0.5)
+    with pytest.raises(ModelError, match="integer"):
+        _clone_value(m, R=R)
+
+
+def test_construction_accepts_integer_valued_float_R() -> None:
+    m = _toy()
+    R = m.R.astype(jnp.float64)  # integer-valued floats are fine
+    m2 = _clone_value(m, R=R)
+    np.testing.assert_array_equal(np.asarray(m2.R), np.asarray(m.R))
+
+
+def test_construction_rejects_duplicate_R() -> None:
+    m = _toy()
+    R = m.R.at[2].set(m.R[0])  # duplicate (-1,0,0)
+    with pytest.raises(ModelError, match="unique"):
+        _clone_value(m, R=R)
+
+
+def test_construction_rejects_non_finite_H_R() -> None:
+    m = _toy()
+    for bad in (jnp.nan, jnp.inf):
+        H_R = m.H_R.at[0, 0, 0].set(bad)
+        with pytest.raises(ModelError, match=r"H_R.*finite"):
+            _clone_value(m, H_R=H_R)
+
+
+def test_construction_rejects_non_finite_weights() -> None:
+    m = _toy()
+    for bad in (jnp.nan, jnp.inf):
+        weights = m.weights.at[0].set(bad)
+        with pytest.raises(ModelError, match=r"weights.*finite"):
+            _clone_value(m, weights=weights)
+
+
+def test_construction_rejects_zero_weights() -> None:
+    m = _toy()
+    weights = m.weights.at[0].set(0.0)
+    with pytest.raises(ModelError, match=r"weights.*nonzero"):
+        _clone_value(m, weights=weights)
+
+
+def test_construction_rejects_non_finite_lattice() -> None:
+    m = _toy()
+    for bad in (jnp.nan, jnp.inf):
+        # bypass Lattice's own host check so the *model-level* finite
+        # check is what fires (pytree unflatten of a traced lattice
+        # also skips Lattice.__post_init__ checks)
+        lat = Lattice.__new__(Lattice)
+        object.__setattr__(lat, "direct", jnp.asarray(m.lattice.direct).at[0, 0].set(bad))
+        with pytest.raises(ModelError, match=r"lattice.*finite"):
+            _clone_value(m, lattice=lat)

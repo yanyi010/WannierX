@@ -13,12 +13,19 @@ from wannierx.core.model import WannierModel
 from wannierx.core.validation import HermiticityReport, validate_hermiticity
 from wannierx.fourier.derivatives import d2H_dk2, dH_dk
 from wannierx.fourier.transform import hamiltonian
-from wannierx.geometry.berry import berry_curvature
+from wannierx.geometry.berry import berry_curvature, checked_berry_curvature
+from wannierx.geometry.kernel import BandGeometry, band_geometry
 from wannierx.geometry.topology import chern_number
 from wannierx.io.wannier90.loader import LoadedWannier90, load_wannier90
 from wannierx.kpoints import mesh as kmesh
 from wannierx.kpoints.integration import integrate, integrate_bands
-from wannierx.kpoints.mesh import KMesh, monkhorst_pack
+from wannierx.kpoints.mesh import (
+    KMesh,
+    gamma_centered_mesh,
+    monkhorst_pack,
+    monkhorst_pack_mesh,
+    uniform_mesh,
+)
 from wannierx.linalg.degeneracy import cluster_degenerate, is_degenerate
 from wannierx.linalg.eigh import EigenSystem, eigh
 from wannierx.linalg.projectors import projector
@@ -51,11 +58,17 @@ __all__ = [  # noqa: RUF022  (grouped by subsystem, not alphabetically)
     "projector",
     # geometry
     "berry_curvature",
+    "checked_berry_curvature",
+    "band_geometry",
+    "BandGeometry",
     "chern_number",
     # kpoints
     "kmesh",
     "KMesh",
+    "gamma_centered_mesh",
     "monkhorst_pack",
+    "monkhorst_pack_mesh",
+    "uniform_mesh",
     "integrate",
     "integrate_bands",
     # io
