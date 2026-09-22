@@ -23,6 +23,7 @@ import numpy as np
 from jax import Array
 
 from wannierx.core.exceptions import LatticeError
+from wannierx.core.staging import is_staged
 
 
 def _as_float3x3(A: Any) -> Array:
@@ -45,14 +46,14 @@ class Lattice:
     def __post_init__(self) -> None:
         A = _as_float3x3(self.direct)
         object.__setattr__(self, "direct", A)
-        # Concrete (non-traced) construction validates singularity; traced
-        # pytree unflattens skip this host check (shape contract is static).
-        if not isinstance(A, jax.core.Tracer):
-            det = float(jnp.linalg.det(A))
-            if not np.isfinite(det) or abs(det) < 1e-12:
-                raise LatticeError(
-                    f"direct lattice is singular or ill-conditioned (det={det!r})"
-                )
+        # Concrete (non-staged) construction validates singularity; staged
+        # pytree unflattens (jit/vmap/checkify/...) skip this host check
+        # (the shape contract is static).
+        if is_staged(A):
+            return
+        det = float(jnp.linalg.det(A))
+        if not np.isfinite(det) or abs(det) < 1e-12:
+            raise LatticeError(f"direct lattice is singular or ill-conditioned (det={det!r})")
 
     # -- reciprocal ---------------------------------------------------
     @property

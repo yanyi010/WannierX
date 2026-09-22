@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+from jax.experimental import checkify
 
 import wannierx as wx
 from wannierx.core.exceptions import DegeneracyError
@@ -58,7 +60,7 @@ def test_berry_gauge_phase_invariance() -> None:
     U2 = eig.vectors * jnp.asarray(ph)[None, :]
     # reconstruct curvature from U2 + same dH, compare
     from wannierx.fourier.derivatives import dH_dk
-    from wannierx.geometry.berry import _omega_all_bands
+    from wannierx.geometry.kernel import _omega_all_bands
 
     dH = dH_dk(m, k)
     Ud2 = jnp.swapaxes(jnp.conjugate(U2), -1, -2)
@@ -129,3 +131,123 @@ def test_chern_failure_on_non_isolated_subspace() -> None:
     with pytest.raises(DegeneracyError):
         # mesh divisible by 3 hits Dirac points
         wx.chern_number(m, mesh=(24, 24), occupied=[0])
+
+
+# --- checked_berry_curvature: tracer-safe strict degeneracy policy ----
+
+
+def test_checked_berry_eager_raises_on_degeneracy() -> None:
+    m = graphene()  # gapless at K
+    with pytest.raises(DegeneracyError, match="min selected spectral gap"):
+        wx.checked_berry_curvature(m, _K(1 / 3, 2 / 3))
+
+
+def test_checked_berry_eager_matches_berry_curvature() -> None:
+    m = qiwuzhang(u=-1.0)
+    k = _K(0.13, 0.41)
+    np.testing.assert_allclose(
+        np.asarray(wx.checked_berry_curvature(m, k)),
+        np.asarray(wx.berry_curvature(m, k, degeneracy_policy="nan")),
+        atol=ATOL,
+    )
+
+
+def test_checked_berry_checkify_jit_raises_via_throw() -> None:
+    m = graphene()
+    checked = checkify.checkify(jax.jit(wx.checked_berry_curvature))
+    err, _ = checked(m, _K(1 / 3, 2 / 3))
+    with pytest.raises(Exception, match="degenerate"):
+        err.throw()
+
+
+def test_checked_berry_checkify_jit_clean_path() -> None:
+    m = qiwuzhang(u=-1.0)
+    k = _K(0.13, 0.41)
+    checked = checkify.checkify(jax.jit(wx.checked_berry_curvature))
+    err, out = checked(m, k)
+    err.throw()  # no degeneracy: must not raise
+    np.testing.assert_allclose(
+        np.asarray(out), np.asarray(wx.berry_curvature(m, k)), atol=ATOL
+    )
+
+
+def test_checked_berry_plain_jit_fails_loudly_at_trace_time() -> None:
+    # an un-functionalized checkify.check cannot be staged: plain jit
+    # must fail at trace time instead of silently skipping the check
+    m = graphene()
+    with pytest.raises(Exception, match="functionalized"):
+        jax.jit(wx.checked_berry_curvature)(m, _K(0.13, 0.41))
+
+
+def test_checked_berry_checkify_vmap() -> None:
+    # regression: model-pytree arguments under checkify(vmap(...)) used
+    # to crash in Lattice validation (tracer-type-based staging guard)
+    m = graphene()
+    ks = jnp.stack([jnp.asarray(_K(1 / 3, 2 / 3))[0], jnp.asarray(_K(0.13, 0.41))[0]])
+    checked = checkify.checkify(
+        jax.vmap(wx.checked_berry_curvature, in_axes=(None, 0))
+    )
+    err, _ = checked(m, ks)
+    with pytest.raises(Exception, match="degenerate"):
+        err.throw()
+    err2, out2 = checked(m, ks[1:])
+    err2.throw()
+    np.testing.assert_allclose(
+        np.asarray(out2),
+        np.asarray(wx.checked_berry_curvature(m, ks[1:])),
+        atol=ATOL,
+    )
+
+
+# --- chern_number: arbitrary (non-contiguous) subspace selection -------
+# 3-band model: QWZ(u=-1) direct-sum a dispersionless band at eps.
+# The flat band is degenerate with the QWZ upper band at Gamma for
+# eps = 1 (E_upper(Gamma) = 1), and well separated for eps = 5
+# (E_upper in [1, 3]).
+
+
+def _qwz_plus_flat(u: float, eps: float) -> wx.WannierModel:
+    m = qiwuzhang(u)
+    H_R = jnp.zeros((m.n_R, 3, 3), dtype=jnp.complex128)
+    H_R = H_R.at[:, :2, :2].set(m.H_R)
+    H_R = H_R.at[0, 2, 2].set(eps)  # R index 0 is (0, 0, 0)
+    return wx.WannierModel(
+        m.lattice, m.R, H_R, m.weights, m.periodic, jnp.zeros((3, 3))
+    )
+
+
+def test_chern_noncontiguous_isolated_selection() -> None:
+    # occupied=[0, 2] = {lower QWZ band (C=-1), flat band (C=0)};
+    # the unselected band 1 lies inside the index span, and the
+    # S <-> complement gap stays open -> C = -1
+    m = _qwz_plus_flat(-1.0, 5.0)
+    c = wx.chern_number(m, mesh=(24, 24), occupied=[0, 2])
+    assert c == pytest.approx(-1.0, abs=1e-10)
+
+
+def test_chern_noncontiguous_degenerate_with_complement_raises() -> None:
+    # flat band at eps = 1 is degenerate with the upper QWZ band at
+    # Gamma, so occupied=[0, 2] is NOT isolated from band 1. The
+    # pre-v0.1.1 span-based check (min/max selected index) reported
+    # gap = inf here and silently accepted the ambiguous subspace.
+    m = _qwz_plus_flat(-1.0, 1.0)
+    with pytest.raises(DegeneracyError, match="complement"):
+        wx.chern_number(m, mesh=(12, 12), occupied=[0, 2])
+
+
+def test_chern_complement_internal_degeneracy_allowed() -> None:
+    # same model as above: bands 1 and 2 are degenerate with each other
+    # at Gamma, but both are in the complement of occupied=[0]; the
+    # FHS link variables are subspace-gauge covariant, so only the
+    # S <-> complement gap matters
+    m = _qwz_plus_flat(-1.0, 1.0)
+    c = wx.chern_number(m, mesh=(24, 24), occupied=[0])
+    assert c == pytest.approx(-1.0, abs=1e-10)
+
+
+def test_chern_full_space_selection_is_zero() -> None:
+    # selecting every band leaves an empty complement; the Chern number
+    # of the full Hilbert space vanishes (band-sum rule)
+    m = _qwz_plus_flat(-1.0, 5.0)
+    c = wx.chern_number(m, mesh=(12, 12), occupied=[0, 1, 2])
+    assert c == pytest.approx(0.0, abs=1e-10)

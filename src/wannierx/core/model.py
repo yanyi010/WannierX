@@ -22,6 +22,7 @@ from jax import Array
 
 from wannierx.core.exceptions import ModelError
 from wannierx.core.lattice import Lattice
+from wannierx.core.staging import is_staged
 
 
 @dataclass(frozen=True)
@@ -77,20 +78,23 @@ class WannierModel:
             raise ModelError(f"periodic must have length 3, got {self.periodic}")
 
         # -- value validation (host-side, concrete arrays only) ---------
-        # R must be integer-valued lattice vectors.
-        if (
-            not isinstance(R, jax.core.Tracer)
-            and not jnp.issubdtype(R.dtype, jnp.integer)
-            and not bool(jnp.all(jnp.round(R) == R))
-        ):
-            raise ModelError("R must contain integer lattice vectors")
-        if not isinstance(R, jax.core.Tracer):
+        # Skipped whenever the corresponding leaf is staged by a JAX
+        # transformation (jit/vmap/checkify/...); see core.staging.
+        if not is_staged(R):
+            # R must be integer-valued lattice vectors.
+            if not jnp.issubdtype(R.dtype, jnp.integer) and not bool(
+                jnp.all(jnp.round(R) == R)
+            ):
+                raise ModelError("R must contain integer lattice vectors")
             if len({tuple(int(v) for v in row) for row in R}) != n_R:
                 raise ModelError("R must contain unique lattice vectors")
-            if not bool(jnp.all(jnp.isfinite(jnp.asarray(self.lattice.direct)))):
-                raise ModelError("lattice must be finite")
-            if not bool(jnp.all(jnp.isfinite(H_R))):
-                raise ModelError("H_R must be finite (no NaN/inf)")
+        if not is_staged(jnp.asarray(self.lattice.direct)) and not bool(
+            jnp.all(jnp.isfinite(jnp.asarray(self.lattice.direct)))
+        ):
+            raise ModelError("lattice must be finite")
+        if not is_staged(H_R) and not bool(jnp.all(jnp.isfinite(H_R))):
+            raise ModelError("H_R must be finite (no NaN/inf)")
+        if not is_staged(weights):
             if not bool(jnp.all(jnp.isfinite(weights))):
                 raise ModelError("weights must be finite (no NaN/inf)")
             if not bool(jnp.all(weights != 0)):
