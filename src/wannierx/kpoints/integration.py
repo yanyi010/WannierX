@@ -78,11 +78,12 @@ def integrate_bands(
         v = kern(model, k)
         return jnp.einsum("k,k...->...", w, v)
 
-    out = None
+    out: Array | None = None
     for i in range(0, mesh.n_k, chunk_size):
         kc = k[i : i + chunk_size]
         wc = w[i : i + chunk_size]
         v = kern(model, kc)
         acc = jnp.einsum("k,k...->...", wc, v)
         out = acc if out is None else out + acc
+    assert out is not None  # mesh.n_k >= 1, so the loop body runs at least once
     return out

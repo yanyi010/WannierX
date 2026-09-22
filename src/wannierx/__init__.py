@@ -18,7 +18,13 @@ from wannierx.geometry.topology import chern_number
 from wannierx.io.wannier90.loader import LoadedWannier90, load_wannier90
 from wannierx.kpoints import mesh as kmesh
 from wannierx.kpoints.integration import integrate, integrate_bands
-from wannierx.kpoints.mesh import KMesh, monkhorst_pack
+from wannierx.kpoints.mesh import (
+    KMesh,
+    gamma_centered_mesh,
+    monkhorst_pack,
+    monkhorst_pack_mesh,
+    uniform_mesh,
+)
 from wannierx.linalg.degeneracy import cluster_degenerate, is_degenerate
 from wannierx.linalg.eigh import EigenSystem, eigh
 from wannierx.linalg.projectors import projector
@@ -55,7 +61,10 @@ __all__ = [  # noqa: RUF022  (grouped by subsystem, not alphabetically)
     # kpoints
     "kmesh",
     "KMesh",
+    "gamma_centered_mesh",
     "monkhorst_pack",
+    "monkhorst_pack_mesh",
+    "uniform_mesh",
     "integrate",
     "integrate_bands",
     # io

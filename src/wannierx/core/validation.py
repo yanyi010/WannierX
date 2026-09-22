@@ -1,7 +1,12 @@
 """Real-space Hermiticity diagnostics.
 
-Checks H_mn(R) = conj(H_nm(-R)) without modifying the model. Missing
--R partners are diagnosed explicitly. Never symmetrizes silently.
+Checks the effective hopping T_mn(R) = w_R H_mn(R) against
+conj(T_nm(-R)) without modifying the model. This is the exact
+real-space condition for H(k) to be Hermitian under the canonical
+convention H(k) = sum_R w_R H_R exp(+i 2 pi k . R): bare H_R = H_{-R}^
+dagger with w_R != w_{-R} still yields a non-Hermitian H(k), so the
+weights must enter the check. Missing -R partners are diagnosed
+explicitly. Never symmetrizes silently.
 """
 
 from __future__ import annotations
@@ -21,10 +26,11 @@ class HermiticityReport:
     Attributes:
         is_hermitian: True when all related pairs match within ``atol`` and
             no -R partner is missing.
-        max_absolute_error: max |H_mn(R) - conj(H_nm(-R))| over related pairs
-            (NaN when no related pairs exist).
-        max_relative_error: absolute error normalized by max(|H|) of the pair,
-            0 when both are zero (NaN when no related pairs exist).
+        max_absolute_error: max |w_R H_mn(R) - w_{-R} conj(H_nm(-R))| over
+            related pairs (NaN when no related pairs exist).
+        max_relative_error: absolute error normalized by max(|w_R H_R|,
+            |w_{-R} H_{-R}|) of the pair, 0 when both are zero (NaN when no
+            related pairs exist).
         worst_R: integer R vector of the worst-matching pair, or None.
         worst_indices: (m, n) orbital index of the worst pair, or None.
         missing_partners: R vectors (n_missing, 3) whose -R partner is absent.
@@ -45,7 +51,12 @@ def _r_key(r: Array) -> tuple[int, int, int]:
 
 
 def validate_hermiticity(model: WannierModel, atol: float = 1e-12) -> HermiticityReport:
-    """Validate H_mn(R) = conj(H_nm(-R)) for a model.
+    """Validate that the effective hopping T_R = w_R H_R is Hermitian-paired.
+
+    Checks T_mn(R) = conj(T_nm(-R)), i.e.
+    ``w_R H_mn(R) == w_{-R} conj(H_nm(-R))``, which is the necessary and
+    sufficient real-space condition for
+    ``H(k) = sum_R w_R H_R exp(+i 2 pi k . R)`` to be Hermitian for all k.
 
     Parameters:
         model: canonical Wannier model.
@@ -59,7 +70,9 @@ def validate_hermiticity(model: WannierModel, atol: float = 1e-12) -> Hermiticit
     Failure behavior: never raises for a well-formed model; the report's
         ``is_hermitian`` and ``missing_partners`` fields carry the diagnosis.
     """
-    R_list = [tuple(int(x) for x in row) for row in model.R]
+    R_list: list[tuple[int, int, int]] = [
+        (int(row[0]), int(row[1]), int(row[2])) for row in model.R
+    ]
     index = {key: i for i, key in enumerate(R_list)}
     missing: list[tuple[int, int, int]] = []
     max_abs = -jnp.inf
@@ -68,6 +81,7 @@ def validate_hermiticity(model: WannierModel, atol: float = 1e-12) -> Hermiticit
     worst_idx: tuple[int, int] | None = None
 
     H = model.H_R
+    w = model.weights.astype(H.dtype)
     n = model.n_orb
 
     for i, key in enumerate(R_list):
@@ -76,14 +90,17 @@ def validate_hermiticity(model: WannierModel, atol: float = 1e-12) -> Hermiticit
             missing.append(key)
             continue
         j = index[neg]
-        # error matrix: H(R) - conj(H(-R))^T
-        err = H[i] - jnp.conjugate(H[j].T)
+        # effective hoppings: T_R = w_R H_R
+        T_i = w[i] * H[i]
+        T_j = w[j] * H[j]
+        # error matrix: T(R) - conj(T(-R))^T
+        err = T_i - jnp.conjugate(T_j.T)
         # relative reference per (m,n)
-        ref = jnp.maximum(jnp.abs(H[i]), jnp.abs(H[j].T))
+        ref = jnp.maximum(jnp.abs(T_i), jnp.abs(T_j.T))
         abs_err = jnp.abs(err)
         a = float(jnp.max(abs_err))
         if a > float(max_abs):
-            max_abs = jnp.asarray(a)
+            max_abs = a
             flat = int(jnp.argmax(abs_err))
             worst_idx = (flat // n, flat % n)
             worst_key = key

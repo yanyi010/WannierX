@@ -76,6 +76,26 @@ class WannierModel:
         if len(tuple(self.periodic)) != 3:
             raise ModelError(f"periodic must have length 3, got {self.periodic}")
 
+        # -- value validation (host-side, concrete arrays only) ---------
+        # R must be integer-valued lattice vectors.
+        if (
+            not isinstance(R, jax.core.Tracer)
+            and not jnp.issubdtype(R.dtype, jnp.integer)
+            and not bool(jnp.all(jnp.round(R) == R))
+        ):
+            raise ModelError("R must contain integer lattice vectors")
+        if not isinstance(R, jax.core.Tracer):
+            if len({tuple(int(v) for v in row) for row in R}) != n_R:
+                raise ModelError("R must contain unique lattice vectors")
+            if not bool(jnp.all(jnp.isfinite(jnp.asarray(self.lattice.direct)))):
+                raise ModelError("lattice must be finite")
+            if not bool(jnp.all(jnp.isfinite(H_R))):
+                raise ModelError("H_R must be finite (no NaN/inf)")
+            if not bool(jnp.all(jnp.isfinite(weights))):
+                raise ModelError("weights must be finite (no NaN/inf)")
+            if not bool(jnp.all(weights != 0)):
+                raise ModelError("weights must be nonzero")
+
         object.__setattr__(self, "R", R)
         object.__setattr__(self, "H_R", H_R)
         object.__setattr__(self, "weights", weights)

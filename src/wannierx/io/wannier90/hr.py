@@ -54,7 +54,9 @@ def parse_hr(path: str | Path) -> HrRaw:
         :class:`HrRaw` with verbatim decoded arrays (float64/complex128).
 
     Failure behavior: raises :class:`ParseError` on malformed header,
-    degeneracy length mismatch, or incomplete/inconsistent matrix blocks.
+    degeneracy length mismatch, non-positive degeneracy, or
+    incomplete/inconsistent matrix blocks (including duplicate or
+    missing (m, n) entries within an R block).
     """
     p = Path(path)
     try:
@@ -90,6 +92,11 @@ def parse_hr(path: str | Path) -> HrRaw:
         raise ParseError(
             f"{p}: degeneracy list has {len(degen)} entries, expected {n_R}"
         )
+    for i, d in enumerate(degen):
+        if d <= 0:
+            raise ParseError(
+                f"{p}: degeneracy entry {i} must be positive, got {d}"
+            )
 
     # matrix blocks
     n_entries = n_R * num_wann * num_wann
@@ -99,11 +106,15 @@ def parse_hr(path: str | Path) -> HrRaw:
             f"{p}: incomplete matrix data ({len(lines) - idx} of {n_entries} entries)"
         )
 
-    R = np.empty((n_R, 3), dtype=np.int64)
-    H_R = np.empty((n_R, num_wann, num_wann), dtype=np.complex128)
+    # np.zeros (not np.empty): any entry a malformed file fails to fill
+    # would otherwise survive as uninitialized garbage; duplicate/missing
+    # detection below guarantees every (m, n) is written exactly once.
+    R = np.zeros((n_R, 3), dtype=np.int64)
+    H_R = np.zeros((n_R, num_wann, num_wann), dtype=np.complex128)
     read = 0
     for r in range(n_R):
         R_first = None
+        seen = np.zeros((num_wann, num_wann), dtype=bool)
         for _m in range(num_wann):
             for _n in range(num_wann):
                 parts = lines[idx].split()
@@ -133,10 +144,27 @@ def parse_hr(path: str | Path) -> HrRaw:
                         f"{p}: inconsistent R within block {r}: "
                         f"{(ri, rj, rk)} != {R_first}"
                     )
+                if seen[m, n]:
+                    raise ParseError(
+                        f"{p}: duplicate (m, n)=({m_}, {n_}) entry in R block "
+                        f"{r} (R={R_first})"
+                    )
+                seen[m, n] = True
                 # m is the row index of <0m|H|Rn>
                 H_R[r, m, n] = re + 1j * im
                 read += 1
         assert R_first is not None
+        if not seen.all():
+            missing_mn = [
+                (int(mm) + 1, int(nn) + 1)
+                for mm, nn in zip(*np.nonzero(~seen), strict=True)
+            ]
+            raise ParseError(
+                f"{p}: R block {r} (R={R_first}) is missing "
+                f"{len(missing_mn)} orbital entr{'y' if len(missing_mn) == 1 else 'ies'} "
+                f"({len(seen) ** 2 - int(seen.sum())} of {num_wann ** 2} expected), "
+                f"first missing (m, n)={missing_mn[0]}"
+            )
         R[r] = R_first
 
     return HrRaw(

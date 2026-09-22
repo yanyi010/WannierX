@@ -70,9 +70,11 @@ def test_grad_isolated_eigenvalue_vs_fd_and_hf() -> None:
 
     # Hellmann-Feynman: dE/dt = <u | dH/dt | u>
     eig = wx.eigh(m0, k)
-    dHdt = (wx.hamiltonian(_replace_t(m0, -1.0 + 1e-8), k[None])
-            - wx.hamiltonian(_replace_t(m0, -1.0 - 1e-8), k[None])) / (2e-8)
-    u = eig.vectors[0, :, 0]
+    dHdt = (
+        wx.hamiltonian(_replace_t(m0, -1.0 + 1e-8), k[None])
+        - wx.hamiltonian(_replace_t(m0, -1.0 - 1e-8), k[None])
+    ) / (2e-8)
+    u = eig.vectors[:, 0]
     hf = float(jnp.real(u.conj() @ dHdt.reshape(1, 1) @ u))
     # FD-based dH/dt agrees with direct chain-rule value
     assert hf == pytest.approx(2.0 * np.cos(2 * np.pi * 0.3), rel=1e-6)
@@ -124,3 +126,54 @@ def test_nonsmooth_at_degeneracy_documented() -> None:
     # The doc-contract: this is a non-smooth point; we assert the *gap* is ~0
     # (failure signal) rather than asking JAX to differentiate through it.
     assert abs(float(eig.energies[0, 1]) - float(eig.energies[0, 0])) < 1e-10
+
+
+# ---------------------------------------------------------------------------
+# jit-dynamic scalars: broadening (DOS) and temperature (Fermi-Dirac)
+# must remain traced; grad through jax.jit agrees with finite differences.
+# ---------------------------------------------------------------------------
+
+
+def test_grad_dos_broadening_under_jit() -> None:
+    m0 = chain(t=-1.0)
+    mesh = monkhorst_pack((32, 1, 1))
+    E = jnp.linspace(-3.0, 3.0, 100)
+
+    def smooth(sigma):
+        d = wx.dos(m0, mesh, E, sigma)
+        return jnp.sum(d * E**2)
+
+    g = float(jax.jit(jax.grad(smooth))(0.08))
+    assert np.isfinite(g)
+    fd = _fd(lambda s: float(smooth(s)), 0.08)
+    assert abs(g - fd[-1]) < TOL_FD
+
+
+def test_grad_fermi_temperature_under_jit() -> None:
+    from wannierx.response.occupations import fermi_dirac
+
+    E = jnp.linspace(-0.4, 0.4, 9)
+
+    def occupied(T):
+        return jnp.sum(fermi_dirac(E, 0.05, T) * E)
+
+    g = float(jax.jit(jax.grad(occupied))(300.0))
+    assert np.isfinite(g)
+    # temperature finite differences need a larger step (K scale)
+    h = 1e-2
+    fd = (float(occupied(300.0 + h)) - float(occupied(300.0 - h))) / (2 * h)
+    assert g == pytest.approx(fd, rel=1e-5, abs=1e-12)
+
+
+def test_fermi_temperature_jit_T0_and_consistency() -> None:
+    """Traced temperature under jit: T = 0 step branch still reachable, and
+    the sigmoid form matches the reference 1/(exp(x)+1) formula."""
+    from wannierx.constants import KB_EV_PER_K
+    from wannierx.response.occupations import fermi_dirac
+
+    E = jnp.array([-0.1, 0.0, 0.1])
+    jitted = jax.jit(lambda T: fermi_dirac(E, 0.0, T))
+    np.testing.assert_allclose(np.asarray(jitted(0.0)), [1.0, 0.5, 0.0], atol=1e-14)
+    f = np.asarray(jitted(300.0))
+    ref = 1.0 / (np.exp((np.asarray(E) - 0.0) / (KB_EV_PER_K * 300.0)) + 1.0)
+    np.testing.assert_allclose(f, ref, rtol=1e-14)

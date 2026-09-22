@@ -13,6 +13,22 @@ from wannierx.models.qzhang import qiwuzhang
 ATOL = 1e-12
 
 
+def test_derivative_shape_contract() -> None:
+    """Locked contract: dH_dk -> (...,3,n,n); d2H_dk2 -> (...,3,3,n,n).
+
+    Mirrors the H(k) contract: k:(3,)->(3,n,n), k:(Nk,3)->(Nk,3,n,n),
+    k:(B,Nk,3)->(B,Nk,3,n,n).
+    """
+    m = qiwuzhang(u=-1.0)  # n_orb = 2
+    n = m.n_orb
+    assert wx.dH_dk(m, jnp.zeros(3)).shape == (3, n, n)
+    assert wx.dH_dk(m, jnp.zeros((5, 3))).shape == (5, 3, n, n)
+    assert wx.dH_dk(m, jnp.zeros((2, 4, 3))).shape == (2, 4, 3, n, n)
+    assert wx.d2H_dk2(m, jnp.zeros(3)).shape == (3, 3, n, n)
+    assert wx.d2H_dk2(m, jnp.zeros((5, 3))).shape == (5, 3, 3, n, n)
+    assert wx.d2H_dk2(m, jnp.zeros((2, 4, 3))).shape == (2, 4, 3, 3, n, n)
+
+
 def _chain_k(nx: int = 9) -> jnp.ndarray:
     kf = jnp.linspace(-0.4, 0.4, nx)
     return jnp.stack([kf, jnp.zeros_like(kf), jnp.zeros_like(kf)], axis=-1)
@@ -41,9 +57,7 @@ def test_chain_d2H_dk2_analytic_and_symmetry() -> None:
     expect = -2 * t * jnp.cos(2 * jnp.pi * k[:, 0])
     np.testing.assert_allclose(np.asarray(d2[:, 0, 0, 0, 0]).real, np.asarray(expect), atol=ATOL)
     # symmetric in (a, b)
-    np.testing.assert_allclose(
-        np.asarray(d2), np.asarray(jnp.swapaxes(d2, -4, -3)), atol=ATOL
-    )
+    np.testing.assert_allclose(np.asarray(d2), np.asarray(jnp.swapaxes(d2, -4, -3)), atol=ATOL)
     np.testing.assert_allclose(np.asarray(d2[:, 1:, :, 0, 0]), 0.0, atol=ATOL)
 
 
@@ -59,16 +73,17 @@ def test_dH_dk_multi_step_finite_difference() -> None:
         dk_cart = np.zeros(3)
         dk_cart[comp] = h
         dk_frac = dk_cart @ np.linalg.inv(B)
-        Hp = np.asarray(wx.hamiltonian(m, jnp.asarray(k0 + dk_frac)))[0]
-        Hm = np.asarray(wx.hamiltonian(m, jnp.asarray(k0 - dk_frac)))[0]
+        Hp = np.asarray(wx.hamiltonian(m, jnp.asarray(k0 + dk_frac)))
+        Hm = np.asarray(wx.hamiltonian(m, jnp.asarray(k0 - dk_frac)))
         return (Hp - Hm) / (2 * h)
 
     dH = np.asarray(wx.dH_dk(m, jnp.array([k0])))[0]
     errs = []
     for h in (1e-3, 1e-4, 1e-5):
         for comp in (0, 1):
-            errs.append(np.abs(dH[comp] - dH_fd(h, comp)).max())
-    # error must decrease, showing the expected truncation/roundoff behavior
+            errs.append(
+                np.abs(dH[comp] - dH_fd(h, comp)).max()
+            )  # error must decrease, showing the expected truncation/roundoff behavior
     assert errs[2] < errs[0] and errs[3] < errs[1]
     assert max(errs) < 1e-6
 
@@ -91,11 +106,11 @@ def test_d2H_dk2_fd_of_dH_dk() -> None:
     def d2_fd(h: float) -> np.ndarray:
         dk = np.zeros(3)
         dk[0] = h
-        dkp = (k0 + dk @ np.linalg.inv(B))
-        dkm = (k0 - dk @ np.linalg.inv(B))
-        dp = np.asarray(wx.dH_dk(m, jnp.asarray(dkp)))[0, 0]
-        dm = np.asarray(wx.dH_dk(m, jnp.asarray(dkm)))[0, 0]
+        dkp = k0 + dk @ np.linalg.inv(B)
+        dkm = k0 - dk @ np.linalg.inv(B)
+        dp = np.asarray(wx.dH_dk(m, jnp.asarray(dkp)))[..., 0, :, :]
+        dm = np.asarray(wx.dH_dk(m, jnp.asarray(dkm)))[..., 0, :, :]
         return (dp - dm) / (2 * h)
 
-    d2 = np.asarray(wx.d2H_dk2(m, jnp.array([k0])))[0, 0, 0]
+    d2 = np.asarray(wx.d2H_dk2(m, jnp.asarray(k0)))[0, 0]
     assert np.abs(d2 - d2_fd(1e-4)).max() < 1e-8

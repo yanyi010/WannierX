@@ -45,9 +45,9 @@ def dos(
     eig = eigh(model, mesh.points)  # (nk, norb)
     eps = eig.energies
     E = jnp.asarray(energies)  # (nE,)
-    sigma = float(broadening)
-    if sigma <= 0:
-        raise ValueError("broadening must be > 0 for a smooth DOS")
+    # keep broadening a traced array: no float() concretization, so
+    # jax.grad / jax.jit treat it as a dynamic differentiable scalar.
+    sigma = jnp.asarray(broadening)
     kernel = jnp.exp(-((E[:, None, None] - eps[None, :, :]) ** 2) / (2.0 * sigma**2))
     dos_k = jnp.sum(kernel, axis=-1) / (jnp.sqrt(2.0 * jnp.pi) * sigma)  # (nE, nk)
     # weighted BZ reduction (weights sum to 1)

@@ -76,7 +76,7 @@ def chern_number(
     eig = eigh(model, k)
     E = np.asarray(eig.energies)
     U = _subspace_vectors(model, k, jnp.asarray(occ))  # (nk, norb, n_occ)
-    U = np.asarray(U)
+    U_np = np.asarray(U)
 
     # --- isolation check (host-side, strict) ---
     E_sorted = np.sort(E, axis=-1)
@@ -96,7 +96,7 @@ def chern_number(
         )
 
     # --- FHS link variables ---
-    U3 = U.reshape(n1, n2, *U.shape[1:])  # (n1, n2, norb, n_occ)
+    U3 = U_np.reshape(n1, n2, *U_np.shape[1:])  # (n1, n2, norb, n_occ)
 
     def shift(a, d1, d2):
         return np.roll(np.roll(a, -d1, axis=0), -d2, axis=1)

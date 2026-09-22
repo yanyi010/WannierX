@@ -48,7 +48,11 @@ select = ["E", "F", "I", "W", "UP", "B", "SIM", "RUF"]
 ignore = ["E501"]
 
 [tool.mypy]
-python_version = "3.11"
+# 3.12 (not 3.11): installed jax ships inline stubs using PEP 695 type
+# parameter syntax, which mypy cannot parse under python_version = "3.11".
+# The *runtime* floor stays 3.11; ruff's target-version = "py311" guards
+# against 3.12-only syntax in this codebase.
+python_version = "3.12"
 mypy_path = "src"
 ignore_missing_imports = true
 warn_unused_ignores = true

@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import jax.numpy as jnp
 import numpy as np
 
 from wannierx.core.exceptions import ParseError
@@ -74,7 +75,7 @@ def parse_win_lattice(path: str | Path) -> Lattice:
         A = A * _BOHR_TO_ANG
     elif unit not in ("ang", "angstrom"):
         raise ParseError(f"{p}: unsupported lattice unit {unit!r} (support: ang, bohr)")
-    return Lattice(A)
+    return Lattice(jnp.asarray(A))
 
 
 def _is_float(s: str) -> bool:
