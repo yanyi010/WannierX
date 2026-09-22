@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wannierx"
+version = "0.1.0"
+description = "Differentiable, accelerator-native Wannier/tight-binding electronic-structure engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "WannierX developers" }]
+dependencies = [
+    "jax>=0.4",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wannierx"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "physics: physics identity/invariance tests",
+    "reference: comparison against trusted reference data",
+    "autodiff: JAX autodiff vs finite-difference checks",
+    "performance: benchmark/regression (non-correctness)",
+    "slow: long-running tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "RUF"]
+# N8xx (pep8-naming) intentionally omitted: physics notation (H_R, dH_dk,
+# BZ, u_nk, H(k), N_R) is conventional in this domain; renaming to
+# pep8-snake_case would hurt readability.
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+[dependency-groups]
+dev = []

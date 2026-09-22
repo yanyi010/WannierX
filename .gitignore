@@ -1,0 +1,12 @@
+__pycache__/
+*.egg-info/
+*.egg-link
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+*.npy
+!tests/reference/fixtures/*.npy
+examples/demo_input/
+*result*/
