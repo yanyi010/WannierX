@@ -1,4 +1,4 @@
-"""Smooth Gaussian density of states (WX-023).
+"""Smooth Gaussian density of states.
 
 Reference method: Gaussian broadening.
 

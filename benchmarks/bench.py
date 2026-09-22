@@ -1,4 +1,4 @@
-"""WX-027: reproducible benchmark harness.
+"""Reproducible benchmark harness.
 
 Runs CPU/gGPU (whichever JAX resolves), x64, and reports per scenario:
     Nk, NR, Norb, dtype, device, compile_time_s, exec_time_s, peak_mem_bytes.

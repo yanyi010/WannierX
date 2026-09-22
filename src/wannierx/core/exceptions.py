@@ -1,6 +1,6 @@
 """WannierX-specific exceptions.
 
-Error philosophy (spec, section 13): fail loudly on ambiguous physics.
+Error philosophy: fail loudly on ambiguous physics.
 These are the specific exception types used across the library.
 """
 

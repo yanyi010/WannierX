@@ -1,4 +1,4 @@
-"""WX-021: KMesh / Monkhorst-Pack tests."""
+"""KMesh / Monkhorst-Pack tests."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
-"""Intrinsic anomalous Hall conductivity (WX-025).
+"""Intrinsic anomalous Hall conductivity.
 
-3D contract (PHYSICS_CONVENTIONS.md, section 11):
+3D contract:
 
     sigma_{a b} = -(e^2/hbar) sum_n integral_BZ d^3k/(2pi)^3 f_nk Omega_n^{ab}
     Output: S/m.

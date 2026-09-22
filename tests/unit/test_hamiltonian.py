@@ -1,4 +1,4 @@
-"""WX-006: H(k) tests."""
+"""H(k) tests."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 """Physical constants in SI (CODATA 2018 exact / derived values).
 
-Units policy (spec, section 6):
+Units policy:
     energy eV, length Angstrom, k in Angstrom^-1, velocity m/s,
     temperature K, 3D conductivity S/m.
 """

@@ -1,6 +1,6 @@
-"""Canonical real-space Wannier Hamiltonian container (WX-003).
+"""Canonical real-space Wannier Hamiltonian container.
 
-Physics convention (PHYSICS_CONVENTIONS.md, section 2):
+Physics convention:
 
     H(k_f) = sum_R w_R H_R exp(+i 2 pi k_f . R)
 
@@ -37,8 +37,7 @@ class WannierModel:
         centers:  optional (n_orb, 3) Wannier centers in fractional
             direct coordinates, or None if unknown.
 
-    Shapes follow the project specification exactly. All arrays are
-    validated for shape consistency at construction.
+    All arrays are validated for shape consistency at construction.
     """
 
     lattice: Lattice

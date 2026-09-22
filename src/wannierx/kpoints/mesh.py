@@ -1,7 +1,7 @@
-"""Canonical k-mesh representation and uniform reciprocal grids (WX-021).
+"""Canonical k-mesh representation and uniform reciprocal grids.
 
 Points are fractional reciprocal coordinates. Weights satisfy
-sum_k w_k = 1 and represent a BZ average (spec section 9). Geometry
+sum_k w_k = 1 and represent a BZ average. Geometry
 (Jacobian) factors live only in the integration layer.
 
 Grid convention (documented, deterministic): for a direction d with

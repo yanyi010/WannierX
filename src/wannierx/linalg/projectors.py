@@ -1,4 +1,4 @@
-"""Band/subspace projectors (WX-017).
+"""Band/subspace projectors.
 
 P_S = sum_{n in S} |u_n><u_n|, with the canonical column-eigenvector
 convention U[..., :, n] = |u_n>. Projector formulations are preferred

@@ -1,4 +1,4 @@
-"""Hermitian eigensystem (WX-014).
+"""Hermitian eigensystem.
 
 Canonical eigenvector convention: ``U[..., :, n] = |u_n>`` (columns),
 eigenvalues ascending. Uses ``jax.numpy.linalg.eigh``; batch semantics

@@ -1,6 +1,6 @@
 """Analytic cartesian k-derivatives of the interpolated Hamiltonian.
 
-Conventions (PHYSICS_CONVENTIONS.md, section 4). The public API takes
+Conventions: the public API takes
 fractional reciprocal k (shape (..., 3)); derivatives are with respect to
 *cartesian* k (Angstrom^-1).
 
@@ -13,7 +13,8 @@ These identities already include the cartesian conversion: with
 k_cart = k_f B and B = 2 pi A^{-T} the chain rule gives
 dk_cart/dk_f = B, so a fractional phase derivative supplies R (times 2 pi),
 and multiplying by A^{-T}/(1) via R^cart/(2 pi)*2 pi = R^cart keeps the
-result in cartesian units. Finite differences are forbidden by the spec.
+result in cartesian units. Derivatives are exact analytic expressions; no
+finite differences are used.
 """
 
 from __future__ import annotations

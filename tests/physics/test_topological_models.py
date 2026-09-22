@@ -1,4 +1,4 @@
-"""WX-018: SSH, Haldane, QWZ, graphene fixture tests."""
+"""SSH, Haldane, QWZ, graphene fixture tests."""
 
 from __future__ import annotations
 

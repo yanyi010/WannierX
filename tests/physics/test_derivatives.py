@@ -1,4 +1,4 @@
-"""WX-012/013: analytic k-derivative tests."""
+"""Analytic k-derivative tests."""
 
 from __future__ import annotations
 

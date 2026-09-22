@@ -1,6 +1,6 @@
-"""Su-Schrieffer-Heeger (SSH) model (part of WX-018).
+"""Su-Schrieffer-Heeger (SSH) model.
 
-Convention (PHYSICS_CONVENTIONS.md, section 12):
+Convention:
 
     H(k) = [[0, t1 + t2 e^{-i k a}], [t1 + t2 e^{i k a}, 0]]
     E_pm(k) = +- sqrt(t1^2 + t2^2 + 2 t1 t2 cos(k a))
@@ -36,7 +36,7 @@ def ssh(t1: float, t2: float, lattice_constant: float = 1.0) -> WannierModel:
     # R list: 0, +1, -1 along x
     # Derivation (locked by tests):
     #   H(k)_mn = sum_R H_mn(R) e^{+ik.R}, H_mn(R) = <0m|H|Rn>.
-    #   Target spec matrix H(k)[0,1] = t1 + t2 e^{-ika} requires
+    #   Target matrix H(k)[0,1] = t1 + t2 e^{-ika} requires
     #   H_01(0) = t1, H_01(-a) = t2, H_01(+a) = 0;
     #   Hermiticity then gives H_10(+a) = t2.
     R = jnp.asarray([[0, 0, 0], [1, 0, 0], [-1, 0, 0]])

@@ -1,4 +1,4 @@
-"""Reusable chunked BZ reductions (WX-024).
+"""Reusable chunked BZ reductions.
 
 Centralizes mesh-weight handling and k-chunking. Weights satisfy sum w_k = 1
 (BZ average). Chunking never changes numerical semantics. Low-level kernels

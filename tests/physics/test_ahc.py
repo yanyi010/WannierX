@@ -1,4 +1,4 @@
-"""WX-025: anomalous Hall conductivity."""
+"""Anomalous Hall conductivity."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Convert parsed Wannier90 input into a canonical model (WX-010)."""
+"""Convert parsed Wannier90 input into a canonical model."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def load_wannier90(
         :class:`LoadedWannier90` with model and selected mode.
 
     Constraints: exact Wigner-Seitz interpolation is NOT claimed when
-    replica semantics are unavailable (spec, ARCHITECTURE section 6).
+    replica semantics are unavailable.
     """
     if mode == "auto":
         selected = "legacy_hr"

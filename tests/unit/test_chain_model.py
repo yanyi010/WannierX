@@ -1,4 +1,4 @@
-"""WX-005: 1D chain fixture tests."""
+"""1D chain fixture tests."""
 
 from __future__ import annotations
 

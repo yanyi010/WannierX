@@ -1,4 +1,4 @@
-"""Graphene nearest-neighbor tight-binding toy model (part of WX-018).
+"""Graphene nearest-neighbor tight-binding toy model.
 
 Same structural conventions as :mod:`wannierx.models.haldane` with only
 the NN term: H_AB(k) = -t sum_i e^{+i 2pi k.d_i}, d in {(1,0),(0,1),(-1,-1)},

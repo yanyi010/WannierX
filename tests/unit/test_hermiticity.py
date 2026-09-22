@@ -1,4 +1,4 @@
-"""WX-004: Hermiticity validator tests."""
+"""Hermiticity validator tests."""
 
 from __future__ import annotations
 

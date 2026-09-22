@@ -1,4 +1,4 @@
-"""WX-028: v0.1 end-to-end release demo.
+"""v0.1 end-to-end release demo.
 
 Runs in a clean environment: Wannier90 input -> load -> validate Hermiticity
 -> band interpolation -> velocity -> Berry curvature -> AHC -> one smooth

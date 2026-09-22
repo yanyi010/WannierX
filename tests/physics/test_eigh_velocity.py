@@ -1,4 +1,4 @@
-"""WX-014..017: eigh, velocity, degeneracy clustering, projectors."""
+"""Eigh, velocity, degeneracy clustering, projectors."""
 
 from __future__ import annotations
 

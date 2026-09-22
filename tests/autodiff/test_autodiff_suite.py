@@ -1,4 +1,4 @@
-"""WX-026: autodiff validation suite.
+"""Autodiff validation suite.
 
 Covers gradients of:
 - Hamiltonian elements w.r.t. model parameters (via pytree fields),

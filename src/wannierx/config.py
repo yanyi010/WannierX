@@ -1,8 +1,8 @@
 """Precision and runtime configuration diagnostics.
 
-Importing :mod:`wannierx` MUST NOT mutate global JAX configuration
-(spec, section 4). This module only provides *read-only* runtime
-diagnostics and explicit helpers the caller may invoke.
+Importing :mod:`wannierx` MUST NOT mutate global JAX configuration.
+This module only provides *read-only* runtime diagnostics and explicit
+helpers the caller may invoke.
 """
 
 from __future__ import annotations

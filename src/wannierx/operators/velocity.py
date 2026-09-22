@@ -1,4 +1,4 @@
-"""Velocity operator and eigenbasis velocity matrix (WX-015).
+"""Velocity operator and eigenbasis velocity matrix.
 
 v_alpha = (1/hbar) dH/dk_alpha, from the analytic cartesian k-derivative
 (no finite differences). Physical output units: m/s.

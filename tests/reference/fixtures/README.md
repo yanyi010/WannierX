@@ -1,4 +1,4 @@
-# toy Wannier90 reference fixture (WX-011)
+# Toy Wannier90 reference fixture
 
 Source: generated in-repo (see git history of this directory).
 Provenance: `toy_hr.dat` is a 2-band SSH-like model with t1=0.8, t2=1.2,

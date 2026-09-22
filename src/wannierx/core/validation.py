@@ -1,4 +1,4 @@
-"""Real-space Hermiticity diagnostics (WX-004).
+"""Real-space Hermiticity diagnostics.
 
 Checks H_mn(R) = conj(H_nm(-R)) without modifying the model. Missing
 -R partners are diagnosed explicitly. Never symmetrizes silently.

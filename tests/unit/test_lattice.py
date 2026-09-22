@@ -1,4 +1,4 @@
-"""WX-002: Lattice tests."""
+"""Lattice tests."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""WX-019/020: Berry curvature & lattice Chern number."""
+"""Berry curvature & lattice Chern number."""
 
 from __future__ import annotations
 

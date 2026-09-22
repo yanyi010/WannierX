@@ -1,6 +1,6 @@
-"""Canonical direct/reciprocal lattice (WX-002).
+"""Canonical direct/reciprocal lattice.
 
-Conventions (PHYSICS_CONVENTIONS.md, section 1):
+Conventions:
 
 - Direct lattice ``A`` has lattice vectors as **rows**, units Angstrom.
 - ``r_cart = r_frac @ A``.

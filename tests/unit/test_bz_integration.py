@@ -1,4 +1,4 @@
-"""WX-024: chunked BZ integrator tests."""
+"""Chunked BZ integrator tests."""
 
 from __future__ import annotations
 

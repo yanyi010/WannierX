@@ -1,4 +1,4 @@
-"""WX-001 smoke test: import works in a clean environment and does not
+"""Smoke test: import works in a clean environment and does not
 mutate global JAX precision configuration."""
 
 from __future__ import annotations

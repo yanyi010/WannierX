@@ -1,4 +1,4 @@
-"""WX-008/009/010: Wannier90 I/O tests."""
+"""Wannier90 I/O tests."""
 
 from __future__ import annotations
 

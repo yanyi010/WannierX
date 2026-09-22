@@ -1,6 +1,6 @@
-"""Differentiable Fourier interpolation of H(k) (WX-006).
+"""Differentiable Fourier interpolation of H(k).
 
-Convention is normative and fixed by the spec:
+Convention (normative):
 
     H(k_f) = sum_R w_R H_R exp(+i 2 pi k_f . R)
 

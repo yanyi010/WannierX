@@ -1,7 +1,7 @@
 """WannierX public API.
 
-Importing this package never mutates global JAX configuration
-(spec, section 4). Enable x64 explicitly (``wx.config.enable_x64()``)
+Importing this package never mutates global JAX configuration.
+Enable x64 explicitly (``wx.config.enable_x64()``)
 or via ``JAX_ENABLE_X64=1``.
 """
 

@@ -1,4 +1,4 @@
-"""Numerically stable Fermi-Dirac occupations (WX-022).
+"""Numerically stable Fermi-Dirac occupations.
 
 f(E, mu, T) = 1 / (exp((E - mu)/(kB T)) + 1)
 

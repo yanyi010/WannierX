@@ -1,4 +1,4 @@
-"""Degeneracy clustering on sorted eigenvalues (WX-016).
+"""Degeneracy clustering on sorted eigenvalues.
 
 Contiguous clusters on ascending eigenvalues using both absolute and
 relative criteria; no universal hard-coded threshold. Deterministic;

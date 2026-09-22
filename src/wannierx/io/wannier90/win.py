@@ -1,4 +1,4 @@
-"""Minimal ``.win`` parser extracting the direct lattice (WX-009).
+"""Minimal ``.win`` parser extracting the direct lattice.
 
 Not a general ``.win`` parser: only the ``unit_cell_cart`` block is
 decoded. Supported units: ``ang``/``angstrom`` (native) and ``bohr``

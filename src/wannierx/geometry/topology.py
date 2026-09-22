@@ -1,4 +1,4 @@
-"""Gauge-robust lattice Chern number (Fukui-Hatsugai-Suzuki) (WX-020).
+"""Gauge-robust lattice Chern number (Fukui-Hatsugai-Suzuki).
 
 Uses link variables from subspace overlaps rather than derivatives of
 arbitrary eigenvector phases:

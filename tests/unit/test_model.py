@@ -1,4 +1,4 @@
-"""WX-003: WannierModel tests."""
+"""WannierModel tests."""
 
 from __future__ import annotations
 

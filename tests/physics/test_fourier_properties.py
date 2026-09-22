@@ -1,4 +1,4 @@
-"""WX-007: Fourier property/regression suite."""
+"""Fourier property/regression suite."""
 
 from __future__ import annotations
 

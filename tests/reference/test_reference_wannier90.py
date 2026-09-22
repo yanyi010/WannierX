@@ -1,4 +1,4 @@
-"""WX-011: trusted Wannier90 interpolation fixture regression."""
+"""Trusted Wannier90 interpolation fixture regression."""
 
 from __future__ import annotations
 

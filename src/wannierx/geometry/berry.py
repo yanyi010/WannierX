@@ -1,6 +1,6 @@
-"""Isolated-band Berry curvature (WX-019).
+"""Isolated-band Berry curvature.
 
-Convention (PHYSICS_CONVENTIONS.md, section 8), units Angstrom^2:
+Units Angstrom^2:
 
     Omega_n^{ab} = -2 Im sum_{m != n}
         <n| d_a H |m> <m| d_b H |n> / (eps_n - eps_m)^2

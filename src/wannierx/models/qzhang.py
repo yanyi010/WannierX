@@ -1,4 +1,4 @@
-"""Qi-Wu-Zhang (QWZ) model (part of WX-018).
+"""Qi-Wu-Zhang (QWZ) model.
 
 Convention (documented here, locked by tests):
 

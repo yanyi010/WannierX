@@ -1,4 +1,4 @@
-"""Haldane honeycomb model (part of WX-018).
+"""Haldane honeycomb model.
 
 Documented convention (locked by tests). All real-space vectors in
 fractional Bravais coordinates, with Bravais lattice

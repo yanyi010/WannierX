@@ -13,9 +13,10 @@ H_mn(R) -> H(k) -> {eps_n(k), |u_nk>} -> operators -> geometric and transport ob
 
 The normative physics conventions (Fourier sign `exp(+ik.R)`, fractional
 reciprocal k-coordinates by default, B = 2*pi*A^{-T}, eigenvectors as columns,
-units) are defined by the project specification and are locked by the test
-suite. Reference precision is float64/complex128; importing `wannierx` never
-mutates global JAX configuration — tests run with `JAX_ENABLE_X64=1`.
+units) are the canonical conventions of this package, documented in the module
+docstrings and locked by the test suite. Reference precision is
+float64/complex128; importing `wannierx` never mutates global JAX
+configuration — tests run with `JAX_ENABLE_X64=1`.
 
 ## Install
 
@@ -57,6 +58,6 @@ src/wannierx/
   models/      chain, SSH, graphene, Haldane, Qi-Wu-Zhang
   utils/       chunking helpers
 tests/
-  unit/  physics/  reference/  autodiff/  performance/
+  unit/  physics/  reference/  autodiff/
 benchmarks/  examples/
 ```

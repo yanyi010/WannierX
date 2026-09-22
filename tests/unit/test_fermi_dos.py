@@ -1,4 +1,4 @@
-"""WX-022/023: Fermi-Dirac and smooth DOS tests."""
+"""Fermi-Dirac and smooth DOS tests."""
 
 from __future__ import annotations
 

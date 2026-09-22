@@ -1,4 +1,4 @@
-"""Low-level parser for Wannier90 ``*_hr.dat`` (WX-008).
+"""Low-level parser for Wannier90 ``*_hr.dat``.
 
 Decodes the conventional file layout into a host-side intermediate
 representation. Applies no physics beyond format decoding — weights,
